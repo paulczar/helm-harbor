@@ -13,9 +13,15 @@ spec:
     spec:
       containers:
       - name: adminserver
-        image: vmware/harbor-adminserver:v1.2.2
+        image: vmware/harbor-adminserver:v1.3.0
         imagePullPolicy: IfNotPresent
         env:
+          - name: PORT
+            value: "8080"
+          - name: JSON_CFG_STORE_PATH
+            value: /etc/adminserver/config.json
+          - name: KEY_PATH
+            value: /etc/adminserver/key
           - name: LOG_LEVEL
             valueFrom:
               configMapKeyRef:
@@ -224,16 +230,25 @@ spec:
                 name: adminserver-config
                 key: RESET
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
         - name: adminserver-data
           mountPath: /data
-        - name: adminserver-secrets
+        - name: adminserver-config
+          mountPath: /etc/adminserver/app.conf
+          subPath: app.conf
+        - name: adminserver-key
           mountPath: /etc/adminserver/key
           subPath: key
       volumes:
       - name: adminserver-data
         emptyDir: {}
-      - name: adminserver-secrets
+      - name: adminserver-config
+        emptyDir: {}
+      - name: adminserver-key
         secret:
           secretName: adminserver-secrets
+          items:
+          - key: key
+            path: key
+

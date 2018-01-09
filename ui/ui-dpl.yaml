@@ -13,7 +13,8 @@ spec:
     spec:
       containers:
       - name: ui
-        image: vmware/harbor-ui:v1.2.2
+        image: vmware/harbor-ui:v1.3.0
+#        command: ["sleep", "300"]
         env:
           - name: UI_SECRET
             valueFrom:
@@ -33,9 +34,11 @@ spec:
             value: /etc/ui/app.conf
           - name: ENABLE_HARBOR_SCAN_ON_PUSH
             value: "1"
+          - name: ADMINSERVER_URL
+            value: http://adminserver
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
         - name: ui-config
           mountPath: /etc/ui/app.conf

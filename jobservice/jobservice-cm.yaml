@@ -5,7 +5,7 @@ metadata:
 data:
   app.conf: |+
     appname = jobservice
-    runmode = dev
+    runmode = prod
 
-    [dev]
-    httpport = 80
+    [prod]
+    httpport = 8080
