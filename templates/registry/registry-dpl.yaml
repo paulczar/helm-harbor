@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "harbor.fullname" . }}-registry"
+  labels:
+    app: "{{ template "harbor.fullname" . }}-registry"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"    
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "{{ template "harbor.fullname" . }}-registry"
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"    
+    spec:
+      containers:
+      - name: registry
+        image: registry:2.6.2
+        imagePullPolicy: IfNotPresent
+        args: ["serve", "/etc/registry/config.yml"]
+        env:
+          - name: REGISTRY_HTTP_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: "{{ template "harbor.fullname" . }}-registry"
+                key: http-secret
+        ports:
+        - containerPort: 5000
+        - containerPort: 5001
+        volumeMounts:
+        - name: registry-data
+          mountPath: /var/lib/registry
+        - name: registry-root-certificate
+          mountPath: /etc/registry/root.crt
+          subPath: root.crt
+        - name: registry-config
+          mountPath: /etc/registry/config.yml
+          subPath: config.yml
+      volumes:
+      - name: registry-data
+        persistentVolumeClaim:
+          claimName: "{{ template "harbor.fullname" . }}-registry-data"
+      - name: registry-root-certificate
+        secret:
+          secretName: "{{ template "harbor.fullname" . }}-registry"
+      - name: registry-config
+        configMap:
+          name: "{{ template "harbor.fullname" . }}-registry"

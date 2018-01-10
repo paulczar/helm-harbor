@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "harbor.fullname" . }}-adminserver"
+data:
+{{ toYaml .Values.adminserver.config.data | indent 2 -}}
+  {{ if .Values.mysql.host -}}
+  MYSQL_HOST: "{{ .Values.mysql.host }}"
+  {{ else -}}
+  MYSQL_HOST: "{{ template "harbor.fullname" . }}-mysql"
+  {{ end -}}
+  MYSQL_PORT: "{{ .Values.mysql.port }}"
+  MYSQL_USR: "{{ .Values.mysql.user }}"
+  MYSQL_DATABASE: "{{ .Values.mysql.database }}"
+  EXT_ENDPOINT: "https://{{ .Values.ingress.url }}"
+  REGISTRY_URL: "http://{{ template "harbor.fullname" . }}-registry:5000"
+  TOKEN_SERVICE_URL: "http://{{ template "harbor.fullname" . }}-ui/service/token"

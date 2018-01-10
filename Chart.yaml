@@ -1,0 +1,15 @@
+name: harbor
+version: 0.0.1
+description: VMWare Enterprise Grade Docker Registry
+keywords:
+- vmware
+- docker
+- registry
+home: https://github.com/vmware/harbor
+icon: https://github.com/vmware/harbor/blob/master/docs/img/harbor_logo.png
+sources:
+- https://github.com/vmware/harbor
+maintainers:
+- name: Paul Czarkowski
+  email: username.taken@gmail.com
+engine: gotpl

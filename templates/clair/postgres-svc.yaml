@@ -1,0 +1,13 @@
+{{ if .Values.clair.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: postgres
+  name: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+{{ end }}
