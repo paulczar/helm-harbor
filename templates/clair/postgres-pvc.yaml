@@ -1,14 +1,16 @@
 {{ if .Values.clair.enabled }}
+{{ if .Values.harbor.storage.persistent }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   annotations:
     volume.beta.kubernetes.io/storage-class: <your-storage-class>
-  name: postgres-data
+  name: {{ template "harbor.fullname" . }}-clair-pg-data
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+{{ end }}
 {{ end }}

@@ -2,15 +2,21 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: clair
+  name: {{ template "harbor.fullname" . }}-clair
   labels:
-    app: clair
+    app: {{ template "harbor.fullname" . }}-clair
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"    
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: clair
+        app: {{ template "harbor.fullname" . }}-clair
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"        
     spec:
       containers:
       - name: clair
@@ -25,8 +31,8 @@ spec:
           subPath: config.yaml
       volumes:
       - name: clair-config
-        secret:
-          secretName: clair-secrets
+        configMap:
+          name: "{{ template "harbor.fullname" . }}"
           items:
             - key: config.yaml
               path: config.yaml

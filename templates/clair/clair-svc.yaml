@@ -3,11 +3,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: clair
-  name: clair
+    app: "{{ template "harbor.fullname" . }}-clair"
+  name: "{{ template "harbor.fullname" . }}-clair"
 spec:
   ports:
     - port: 6060
   selector:
-    app: clair
+    app: "{{ template "harbor.fullname" . }}-clair"
 {{ end }}

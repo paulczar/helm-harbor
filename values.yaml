@@ -1,5 +1,7 @@
 harbor:
   url: harbor.192.168.99.100.xip.io
+  storage:
+    persistent: "false"
   tls_crt: |
     -----BEGIN CERTIFICATE-----
     MIIDJDCCAgygAwIBAgIJAKNSg1jp3l2oMA0GCSqGSIb3DQEBCwUAMBIxEDAOBgNV
@@ -211,8 +213,8 @@ registry:
 ## Enabling it will just break things.
 #
 clair:
-  enabled: false
-  dbPassword: password
+  enabled: true
+  postgresRootPassword: not-a-secure-password
 
 ## Notary support is not yet fully implemented in the Helm Charts
 ## Enabling it will just break things.
