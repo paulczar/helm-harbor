@@ -19,15 +19,16 @@ spec:
     spec:
       containers:
       - name: registry
-        image: registry:2.6.2
-        imagePullPolicy: IfNotPresent
+        image: {{ .Values.registry.image.repository }}:{{ .Values.registry.image.tag }}
+        imagePullPolicy: {{ .Values.registry.image.pullPolicy }}
+
         args: ["serve", "/etc/registry/config.yml"]
         env:
           - name: REGISTRY_HTTP_SECRET
             valueFrom:
               secretKeyRef:
                 name: "{{ template "harbor.fullname" . }}-registry"
-                key: http-secret
+                key: httpSecret
         ports:
         - containerPort: 5000
         - containerPort: 5001

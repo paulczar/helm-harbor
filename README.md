@@ -1,127 +1,115 @@
-# VMWare Harbor "hard way"
+# VMWare Harbor
 
-All components of harbor was separeted in directories (with a intuitive name :p);
-The files have sufix, it represents:
- - dpl = Deployment
- - svc = Service
- - pvc = Persistent Volume Claim
- - secret = Secrets (passwords, certificates...)
+[VMWare Harbor](http://vmware.github.io/harbor/) VMWare Harbor is an enterprise-class registry server that stores and distributes Docker images. Harbor extends the open source Docker Distribution by adding the functionalities usually required by an enterprise, such as security, identity and management. As an enterprise private registry, Harbor offers better performance and security. Having a registry closer to the build and run environment improves the image transfer efficiency. Harbor supports the setup of multiple registries and has images replicated between them. In addition, Harbor offers advanced security features, such as user management, access control and activity auditing.
 
-# What you NEED do to deploy
+## Introduction
 
-The manifests are configured in a way that it should deploy and work as is on minikube.
+This chart installs and configures VMWare Harbor.
 
-If you're not using minikube, LOOK inside of all files and change what makes sense for your environment like:
- - URL's
- - Certificates (you must generate all)
+## Prerequisites
 
-## URLs
+- Kubernetes 1.7+ with Beta APIs enabled
+- PV provisioner support in the underlying infrastructure
 
-The deployment is set up to use https://harbor.192.168.99.100.xip.io. This should
-resolve to your minikube deployment (`$ minikube ip` to confirm). If your machine
-is offline you may need to add it to `/etc/hosts`. If you are not using minikube
-you can update this URL as needed in the included Kubernetes manifests.
+## Installing the Chart
 
+To install the chart with the release name `my-release`:
 
-## Certificates
-
-Self signed certificates have been created for the domain `harbor.192.168.99.100.xip.io` and have been added to the various secret files. If you need to change the domain you can generate new secrets using `$ docker run -ti -e SSL_SUBJECT="harbor.192.168.99.100.xip.io" -e SSL_IP=192.168.99.100 -e OUTPUT=k8s paulczar/omgwtfssl` (replace the subject and IP as needed) and copy output into `ingress/secret.yaml`.
-
-## Ingress and Dynamic Volume Claims
-
-Ideally your Kubernetes cluster should support both ingress and dynamic volumes.
-
-If your cluster does not support Dynamic Volume Claims you may need to
-modify the storage manifests for each service that requires it (`mysql/mysql-pvc.yaml` and `registry/registry-pvc.yaml`). You may also need to uncomment and set the storage class annotations in them.
-
-If your cluster does not support ingress you can try to use `kubectl create -f nginx` instead of
-`kubectl create -f ingress` when following the install instructions.
-
-If you are using minikube then you'll want to ensure that `ingress` and `default-storageclass` plugins are enabled. If not you should enable them. Sometimes for minikube's ingress to work correctly you need to stop and start minikube again.
-
-```
-$ minikube addons enable ingress
-$ minikube addons enable default-storageclass
+```bash
+$ git clone https://github.com/paulczar/helm-harbor.git harbor
+$ cd harbor
+$ helm install --name my-release .
 ```
 
-# Example Deployment to Minikube
+The command deploys Harbor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
-Install the latest versions of
+> **Tip**: List all releases using `helm list`
 
-* [minikube](https://github.com/kubernetes/minikube/releases)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-via-curl)
+## Uninstalling the Chart
 
-Start minikube and ensure its set up correctly for ingress and storageclass:
+To uninstall/delete the `my-release` deployment:
 
-```
-$ minikube start                                     
-Starting local Kubernetes v1.8.0 cluster...
-Starting VM...
-Getting VM IP address...
-Moving files into cluster...
-Setting up certs...
-Connecting to cluster...
-Setting up kubeconfig...
-Starting cluster components...
-Kubectl is now configured to use the cluster.
-
-$ minikube addons list
-- default-storageclass: enabled
-- ingress: enabled
+```bash
+$ helm delete my-release
 ```
 
-Deploy Harbor to Kubernetes:
+The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Configuration
+
+The following tables lists the configurable parameters of the Percona chart and their default values.
+
+| Parameter                  | Description                        | Default                 |
+| -----------------------    | ---------------------------------- | ----------------------- |
+| **Harbor** |
+| `harbor.url`               | domain harbor will run on (https://*harbor.url*/) |`harbor.192.168.99.100.xip.io`   |
+| `harbor.tls_crt`               | TLS certificate to use for Harbor's https endpoint | see values.yaml |
+| `harbor.tls_key`               | TLS key to use for Harbor's https endpoint | see values.yaml |
+| `harbor.ca_crt`               | CA Cert for self signed TLS cert | see values.yaml |
+| **Adminserver** |
+| `adminserver.image.repository` | Repository for adminserver image | `vmware/harbor-adminserver` |
+| `adminserver.image.tag` | Tag for adminserver image | `v1.3.0` |
+| `adminserver.image.pullPolicy` | Pull Policy for adminserver image | `IfNotPresent` |
+| `adminserver.emailHost` | email server | `smtp.mydomain.com` |
+| `adminserver.emailPort` | email port | `25` |
+| `adminserver.emailUser` | email username | `sample_admin@mydomain.com` |
+| `adminserver.emailSsl` | email uses SSL? | `false` |
+| `adminserver.emailFrom` | send email from address | `admin <sample_admin@mydomain.com>` |
+| `adminserver.emailIdentity` | | "" |
+| `adminserver.key` | adminsever key | `not-a-secure-key` |
+| `adminserver.emailPwd` | password for email | `not-a-secure-password` |
+| `adminserver.harborAdminPassword` | password for admin user | `Harbor12345` |
+| **Jobservice** |
+| `jobservice.image.repository` | Repository for jobservice image | `vmware/harbor-jobservice` |
+| `jobservice.image.tag` | Tag for jobservice image | `v1.3.0` |
+| `jobservice.image.pullPolicy` | Pull Policy for jobservice image | `IfNotPresent` |
+| `jobservice.key` | jobservice key | `not-a-secure-key` |
+| `jobservice.secret` | jobservice secret | `not-a-secure-secret` |
+| **UI** |
+| `ui.image.repository` | Repository for ui image | `vmware/harbor-ui` |
+| `ui.image.tag` | Tag for ui image | `v1.3.0` |
+| `ui.image.pullPolicy` | Pull Policy for ui image | `IfNotPresent` |
+| `ui.key` | ui key | `not-a-secure-key` |
+| `ui.secret` | ui secret | `not-a-secure-secret` |
+| `ui.privateKeyPem` | ui private key | see values.yaml |
+| **MySQL** |
+| `mysql.image.repository` | Repository for mysql image | `vmware/harbor-mysql` |
+| `mysql.image.tag` | Tag for mysql image | `v1.3.0` |
+| `mysql.image.pullPolicy` | Pull Policy for mysql image | `IfNotPresent` |
+| `mysql.host` | MySQL Server | `~` | 
+| `mysql.port` | MySQL Port | `3306` |
+| `mysql.user` | MySQL Username | `root` |
+| `mysql.pass` | MySQL Password | `registry` |
+| `mysql.database` | MySQL Database | `registry` |
+| **Registry** |
+| `registry.image.repository` | Repository for registry image | `vmware/harbor-registry` |
+| `registry.image.tag` | Tag for registry image | `v1.3.0` |
+| `registry.image.pullPolicy` | Pull Policy for admregistryinserver image | `IfNotPresent` |
+| `registry.rootCrt` | registry root cert | see values.yaml |
+| `registry.httpSecret` | registry secret | `not-a-secure-secret` |
+| **Clair** _(not yet supported)_ |
+| `clair.enabled` | Enable clair? | `false` |
+| **Notary** _(not yet supported)_ |
+| `notary.enabled` | Enable notary? | `false` |
+| | | |
+
+
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+
+```bash
+$ helm install --name my-release --set mysql.pass=baconeggs .
 ```
-$ for i in adminserver ingress jobservice mysql registry ui; do kubectl create -f $i; done
-configmap "adminserver-config" created
-deployment "adminserver" created
-...
-...
-service "ui" created
+
+Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
+
+```bash
+$ helm install --name my-release -f /path/to/values.yaml .
 ```
 
-After a few minutes confirm everything looks good:
+> **Tip**: You can use the default [values.yaml](values.yaml)
 
-```
-$ kubectl get pods
-NAME                          READY     STATUS    RESTARTS   AGE
-adminserver-7d95b54c9-mhtkg   1/1       Running   0          2m
-jobservice-545b888ffd-p8g54   1/1       Running   1          2m
-mysql-85786d8c5f-6jsrf        1/1       Running   0          2m
-registry-9c48dfbd7-jrdzv      1/1       Running   0          2m
-ui-9d68b87cf-wmkrg            1/1       Running   2          2m
-```
+## Persistence
 
-Then try to access the UI via your browser - [https://harbor.192.168.99.100.xip.io](https://harbor.192.168.99.100.xip.io). Accept the self signed cert.
+VMWare Harbor stores the data and configurations in emptyDir volumes. You can change the values.yaml to enable persistence and use a PersistentVolumeClaim instead.
 
-Next try to login to the docker registry ( user `admin` password `Harbor12345`):
-
-```
-$ docker login harbor.192.168.99.100.xip.io
-Username (admin): test
-Password:
-Error response from daemon: Get https://harbor.192.168.99.100.xip.io/v1/users/: x509: certificate signed by unknown authority
-```
-
-It should fail. By default docker expects registries to be signed by a trusted Certificate Authority. The certificate used by our ingress service is self signed. You can tell docker to trust our self signed certificate by doing:
-
-```
-$ sudo mkdir /etc/docker/certs.d/harbor.192.168.99.100.xip.io
-$ sudo cp ingress/ca.crt /etc/docker/certs.d/harbor.192.168.99.100.xip.io/
-
-$ docker login harbor.192.168.99.100.xip.io
-Username (admin): admin
-Password:
-Login Succeeded
-$ docker pull alpine
-Using default tag: latest
-latest: Pulling from library/alpine
-Digest: sha256:d6bfc3baf615dc9618209a8d607ba2a8103d9c8a405b3bd8741d88b4bef36478
-Status: Image is up to date for alpine:latest
-$ docker tag alpine harbor.192.168.99.100.xip.io/library/alpine
-$ docker push harbor.192.168.99.100.xip.io/library/alpine
-The push refers to a repository [harbor.192.168.99.100.xip.io/library/alpine]
-2aebd096e0e2: Pushed
-latest: digest: sha256:ca559e07aab1445b3aaf1c7d1996a6b0fcc0df3557461ae582459680effd33dc size: 528
-```
+> *"An emptyDir volume is first created when a Pod is assigned to a Node, and exists as long as that Pod is running on that node. When a Pod is removed from a node for any reason, the data in the emptyDir is deleted forever."*

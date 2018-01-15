@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: vmware/harbor-db:v1.3.0
-        imagePullPolicy: IfNotPresent
+        image: {{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}
+        imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
         ports:
         - containerPort: 3306
         env:
@@ -28,7 +28,7 @@ spec:
             valueFrom:
               secretKeyRef:
                name: "{{ template "harbor.fullname" . }}-mysql"
-               key: MYSQL_ROOT_PASSWORD
+               key: mysqlRootPassword
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql

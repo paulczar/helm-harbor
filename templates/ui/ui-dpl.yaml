@@ -19,18 +19,19 @@ spec:
     spec:
       containers:
       - name: ui
-        image: vmware/harbor-ui:v1.3.0
+        image: {{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}
+        imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
         env:
           - name: UI_SECRET
             valueFrom:
               secretKeyRef:
                 name: "{{ template "harbor.fullname" . }}-ui"
-                key: UI_SECRET
+                key: secret
           - name: JOBSERVICE_SECRET
             valueFrom:
               secretKeyRef:
-                name: "{{ template "harbor.fullname" . }}-jobservice"
-                key: JOBSERVICE_SECRET
+                name: "{{ template "harbor.fullname" . }}-ui"
+                key: jobserviceSecret
           - name: GODEBUG
             value: netdns=cgo
           - name: LOG_LEVEL
@@ -41,7 +42,6 @@ spec:
             value: "1"
           - name: ADMINSERVER_URL
             value: "http://{{ template "harbor.fullname" . }}-adminserver"
-        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         volumeMounts:

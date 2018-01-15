@@ -19,18 +19,12 @@ spec:
     spec:
       containers:
       - name: jobservice
-        image: vmware/harbor-jobservice:v1.3.0
+        image: {{ .Values.jobservice.image.repository }}:{{ .Values.jobservice.image.tag }}
+        imagePullPolicy: {{ .Values.jobservice.image.pullPolicy }}
+        envFrom:
+        - secretRef:
+            name: "{{ template "harbor.fullname" . }}-jobservice"
         env:
-          - name: UI_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: "{{ template "harbor.fullname" . }}-ui"
-                key: UI_SECRET
-          - name: JOBSERVICE_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: "{{ template "harbor.fullname" . }}-jobservice"
-                key: JOBSERVICE_SECRET
           - name: LOG_LEVEL
             value: debug
           - name: CONFIG_PATH
@@ -39,7 +33,6 @@ spec:
             value: netdns=cgo
           - name: ADMINSERVER_URL
             value: "http://{{ template "harbor.fullname" . }}-adminserver"            
-        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         volumeMounts:
