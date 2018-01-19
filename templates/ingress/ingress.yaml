@@ -13,10 +13,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - "{{ .Values.harbor.url }}"
+    - "{{ .Values.externalDomain }}"
     secretName: "{{ template "harbor.fullname" . }}-ingress"
   rules:
-  - host: "{{ .Values.harbor.url }}"
+  - host: "{{ .Values.externalDomain }}"
     http:
       paths:
       - path: /

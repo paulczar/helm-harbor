@@ -12,7 +12,8 @@ spec:
   serviceName: "{{ template "harbor.fullname" . }}-mysql"
   selector:
     matchLabels:
-      app: "{{ template "harbor.fullname" . }}-mysql"  
+      app: "{{ template "harbor.fullname" . }}-mysql"
+      release: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
@@ -25,8 +26,8 @@ spec:
       - name: mysql
         image: {{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}
         imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
-        ports:
-        - containerPort: 3306
+        resources:
+{{ toYaml .Values.mysql.resources | indent 10 }}        
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
@@ -36,7 +37,25 @@ spec:
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
+      {{- if not .Values.persistence.enabled }}
       volumes:
-      - name: mysql-data
-        persistentVolumeClaim:
-          claimName: "{{ template "harbor.fullname" . }}-mysql-data"
+      - name: "mysql-data"
+        emptyDir: {}
+      {{- end -}}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: "mysql-data"
+    spec:
+      accessModes: [{{ .Values.mysql.volumes.data.accessMode | quote }}]
+      {{- if .Values.mysql.volumes.data.storageClass }}
+      {{- if (eq "-" .Values.mysql.volumes.data.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.mysql.volumes.data.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.mysql.volumes.data.size | quote }}
+  {{- end -}}

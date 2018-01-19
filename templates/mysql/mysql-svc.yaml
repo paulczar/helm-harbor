@@ -7,3 +7,4 @@ spec:
     - port: 3306
   selector:
     app: "{{ template "harbor.fullname" . }}-mysql"
+    release: {{ .Release.Name }}

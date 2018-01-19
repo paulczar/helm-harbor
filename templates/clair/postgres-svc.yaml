@@ -10,6 +10,7 @@ spec:
     - port: 5432
   selector:
     app: {{ template "harbor.fullname" . }}-clair-pg
+    release: {{ .Release.Name }}
 ---
 # clairdb host isn't configurable yet.  this creates a service
 # to get it working for now.
@@ -24,5 +25,6 @@ spec:
   ports:
     - port: 5432
   selector:
-    app: {{ template "harbor.fullname" . }}-clair-pg    
+    app: {{ template "harbor.fullname" . }}-clair-pg
+    release: {{ .Release.Name }}
 {{ end }}

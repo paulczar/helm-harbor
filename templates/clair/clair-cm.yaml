@@ -9,7 +9,7 @@ data:
       database:
         type: pgsql
         options:
-          source: "postgresql://postgres:{{ .Values.clair.postgresRootPassword }}@{{ template "harbor.fullname" . }}-clair-pg:5432?sslmode=disable"
+          source: "postgresql://postgres:{{ .Values.clair.postgresPassword }}@{{ template "harbor.fullname" . }}-clair-pg:5432?sslmode=disable"
 
           # Number of elements kept in the cache
           # Values unlikely to change (e.g. namespaces) are cached in order to save prevent needless roundtrips to the database.

@@ -42,10 +42,11 @@ The following tables lists the configurable parameters of the Percona chart and 
 | Parameter                  | Description                        | Default                 |
 | -----------------------    | ---------------------------------- | ----------------------- |
 | **Harbor** |
-| `harbor.url`               | domain harbor will run on (https://*harbor.url*/) |`harbor.192.168.99.100.xip.io`   |
-| `harbor.tls_crt`               | TLS certificate to use for Harbor's https endpoint | see values.yaml |
-| `harbor.tls_key`               | TLS key to use for Harbor's https endpoint | see values.yaml |
-| `harbor.ca_crt`               | CA Cert for self signed TLS cert | see values.yaml |
+| `externalDomain`               | domain harbor will run on (https://*harbor.url*/) |`harbor.192.168.99.100.xip.io`   |
+| `tls_crt`               | TLS certificate to use for Harbor's https endpoint | see values.yaml |
+| `tls_key`               | TLS key to use for Harbor's https endpoint | see values.yaml |
+| `ca_crt`               | CA Cert for self signed TLS cert | see values.yaml |
+| `persistence.enabled` | enable persistent data storage | `false` |
 | **Adminserver** |
 | `adminserver.image.repository` | Repository for adminserver image | `vmware/harbor-adminserver` |
 | `adminserver.image.tag` | Tag for adminserver image | `v1.3.0` |
@@ -59,12 +60,15 @@ The following tables lists the configurable parameters of the Percona chart and 
 | `adminserver.key` | adminsever key | `not-a-secure-key` |
 | `adminserver.emailPwd` | password for email | `not-a-secure-password` |
 | `adminserver.harborAdminPassword` | password for admin user | `Harbor12345` |
+| `adminserver.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
+| `adminserver.volumes` | used to create PVCs if persistence is enabled (see instructions in values.yaml) | see values.yaml |
 | **Jobservice** |
 | `jobservice.image.repository` | Repository for jobservice image | `vmware/harbor-jobservice` |
 | `jobservice.image.tag` | Tag for jobservice image | `v1.3.0` |
 | `jobservice.image.pullPolicy` | Pull Policy for jobservice image | `IfNotPresent` |
 | `jobservice.key` | jobservice key | `not-a-secure-key` |
 | `jobservice.secret` | jobservice secret | `not-a-secure-secret` |
+| `jobservice.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
 | **UI** |
 | `ui.image.repository` | Repository for ui image | `vmware/harbor-ui` |
 | `ui.image.tag` | Tag for ui image | `v1.3.0` |
@@ -72,6 +76,7 @@ The following tables lists the configurable parameters of the Percona chart and 
 | `ui.key` | ui key | `not-a-secure-key` |
 | `ui.secret` | ui secret | `not-a-secure-secret` |
 | `ui.privateKeyPem` | ui private key | see values.yaml |
+| `ui.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
 | **MySQL** |
 | `mysql.image.repository` | Repository for mysql image | `vmware/harbor-mysql` |
 | `mysql.image.tag` | Tag for mysql image | `v1.3.0` |
@@ -81,16 +86,20 @@ The following tables lists the configurable parameters of the Percona chart and 
 | `mysql.user` | MySQL Username | `root` |
 | `mysql.pass` | MySQL Password | `registry` |
 | `mysql.database` | MySQL Database | `registry` |
+| `mysql.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
+| `mysql.volumes` | used to create PVCs if persistence is enabled (see instructions in values.yaml) | see values.yaml |
 | **Registry** |
 | `registry.image.repository` | Repository for registry image | `vmware/harbor-registry` |
 | `registry.image.tag` | Tag for registry image | `v1.3.0` |
 | `registry.image.pullPolicy` | Pull Policy for admregistryinserver image | `IfNotPresent` |
 | `registry.rootCrt` | registry root cert | see values.yaml |
 | `registry.httpSecret` | registry secret | `not-a-secure-secret` |
-| **Clair** _(not yet supported)_ |
+| `registry.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
+| `registry.volumes` | used to create PVCs if persistence is enabled (see instructions in values.yaml) | see values.yaml |
+| **Clair** |
 | `clair.enabled` | Enable clair? | `false` |
-| **Notary** _(not yet supported)_ |
-| `notary.enabled` | Enable notary? | `false` |
+| `clair.postgresPassword` | password for clair postgres | see values.yaml |
+| `clair.resources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined | `clair.pgResources` | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to allocate for container   | undefined |
 | | | |
 
 

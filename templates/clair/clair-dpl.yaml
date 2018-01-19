@@ -21,6 +21,8 @@ spec:
       containers:
       - name: clair
         image: vmware/clair:v2.0.1-photon
+        resources:
+{{ toYaml .Values.clair.resources | indent 10 }}        
         args: ["-insecure-tls", "-config", "/config/config.yaml"]
         imagePullPolicy: IfNotPresent
         ports:

@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
-  name: "{{ template "harbor.fullname" . }}-adminserver"
+  name: "{{ template "harbor.fullname" . }}"
   labels:
     app: "{{ template "harbor.fullname" . }}-adminserver"
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -13,6 +13,7 @@ spec:
   selector:
     matchLabels:
       app: "{{ template "harbor.fullname" . }}-adminserver"
+      release: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
@@ -25,6 +26,8 @@ spec:
       - name: adminserver
         image: "{{ .Values.adminserver.image.repository }}:{{ .Values.adminserver.image.tag }}"
         imagePullPolicy: "{{ .Values.adminserver.image.pullPolicy }}"
+        resources:
+{{ toYaml .Values.adminserver.resources | indent 10 }}         
         envFrom:
         - configMapRef:
             name: "{{ template "harbor.fullname" . }}-adminserver"
@@ -34,29 +37,42 @@ spec:
           - name: PORT
             value: "8080"
           - name: JSON_CFG_STORE_PATH
-            value: /etc/adminserver/config.json
+            value: /etc/adminserver/config/config.json
           - name: KEY_PATH
             value: /etc/adminserver/key
         ports:
         - containerPort: 8080
         volumeMounts:
-        - name: adminserver-data
-          mountPath: /data
         - name: adminserver-config
-          mountPath: /etc/adminserver/app.conf
-          subPath: app.conf
+          mountPath: /etc/adminserver/config
         - name: adminserver-key
           mountPath: /etc/adminserver/key
           subPath: key
       volumes:
-      - name: adminserver-data
-        emptyDir: {}
+      {{- if not .Values.persistence.enabled }}      
       - name: adminserver-config
         emptyDir: {}
+      {{- end }}
       - name: adminserver-key
         secret:
           secretName: "{{ template "harbor.fullname" . }}-adminserver"
           items:
           - key: key
             path: key
-
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: adminserver-config
+    spec:
+      accessModes: [{{ .Values.adminserver.volumes.config.accessMode | quote }}]
+      {{- if .Values.adminserver.volumes.config.storageClass }}
+      {{- if (eq "-" .Values.adminserver.volumes.config.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.adminserver.volumes.config.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.adminserver.volumes.config.size | quote }}
+  {{- end -}}

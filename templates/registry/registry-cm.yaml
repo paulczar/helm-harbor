@@ -10,24 +10,28 @@ data:
       fields:
         service: registry
     storage:
-        cache:
-            layerinfo: inmemory
-        filesystem:
-            rootdirectory: /var/lib/registry
-        maintenance:
-            uploadpurging:
-                enabled: false
-        delete:
-            enabled: true
+      {{- if .Values.registry.objectStorage }}
+{{ toYaml .Values.registry.objectStorage | indent 6 }}
+      {{- end }}
+      cache:
+        layerinfo: inmemory
+      filesystem:
+        rootdirectory: /var/lib/registry
+      maintenance:
+        uploadpurging:
+          enabled: false
+      delete:
+        enabled: true
     http:
-        addr: :5000
-        secret: placeholder
-        debug:
-            addr: localhost:5001
+      addr: :5000
+      # set via environment variable
+      # secret: placeholder
+      debug:
+        addr: localhost:5001
     auth:
       token:
         issuer: harbor-token-issuer
-        realm: "https://{{ .Values.harbor.url }}/service/token"
+        realm: "https://{{ .Values.externalDomain }}/service/token"
         rootcertbundle: /etc/registry/root.crt
         service: harbor-registry
 

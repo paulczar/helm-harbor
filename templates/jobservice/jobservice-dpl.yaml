@@ -21,6 +21,8 @@ spec:
       - name: jobservice
         image: {{ .Values.jobservice.image.repository }}:{{ .Values.jobservice.image.tag }}
         imagePullPolicy: {{ .Values.jobservice.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.jobservice.resources | indent 10 }}        
         envFrom:
         - secretRef:
             name: "{{ template "harbor.fullname" . }}-jobservice"
